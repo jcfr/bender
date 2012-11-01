@@ -9,6 +9,7 @@ set(CMAKE_TESTDRIVER_BEFORE_TESTMAIN "DEBUG_LEAKS_ENABLE_EXIT_ERROR();" )
 create_test_sourcelist(Tests ${KIT}CxxTests.cxx
   ${KIT_TEST_NAMES_CXX}
   vtkSlicerArmaturesLogicTest.cxx
+  vtkSlicerArmaturesLogicTest4.cxx
   EXTRA_INCLUDE vtkMRMLDebugLeaksMacro.h
   )
 
@@ -19,3 +20,4 @@ add_executable(${KIT}CxxTests ${Tests})
 target_link_libraries(${KIT}CxxTests ${KIT})
 
 SIMPLE_TEST( vtkSlicerArmaturesLogicTest ${TEST_DATA}/SimpleSnake.arm )
+SIMPLE_TEST( vtkSlicerArmaturesLogicTest4 )

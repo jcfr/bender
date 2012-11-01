@@ -31,7 +31,9 @@
 #include <vtkCellData.h>
 #include <vtkDoubleArray.h>
 #include <vtkIdTypeArray.h>
+#include <vtkIdList.h>
 #include <vtkMath.h>
+#include <vtkMatrix3x3.h>
 #include <vtkNew.h>
 #include <vtkPointData.h>
 #include <vtkPoints.h>
@@ -92,6 +94,9 @@ vtkMRMLModelNode* vtkSlicerArmaturesLogic
   vtkPolyData* mainArmature =
     applyPose? posedArmature.GetPointer() : restArmature.GetPointer();
 
+  vtkPolyData* otherArmature =
+    applyPose? restArmature.GetPointer() : posedArmature.GetPointer();
+
   vtkDataArray* otherPoints =
     applyPose? restArmature->GetPoints()->GetData() :
                posedArmature->GetPoints()->GetData();
@@ -104,6 +109,48 @@ vtkMRMLModelNode* vtkSlicerArmaturesLogic
   otherFrames->SetName(applyPose ? "RestFrames" : "PosedFrames");
   mainArmature->GetCellData()->AddArray(otherFrames);
 
+  if (!applyPose)
+    {
+    vtkNew<vtkDoubleArray> transforms;
+    transforms->SetNumberOfComponents(12);
+    transforms->SetName("Transforms");
+    mainArmature->GetCellData()->AddArray(transforms.GetPointer());
+
+    for (vtkIdType i = 0; i < mainArmature->GetNumberOfCells(); ++i)
+      {
+      vtkNew<vtkIdList> mainPts;
+      mainArmature->GetCellPoints(i, mainPts.GetPointer());
+      vtkNew<vtkIdList> otherPts;
+      otherArmature->GetCellPoints(i, otherPts.GetPointer());
+      double mainHead[3];
+      double mainTail[3];
+      mainArmature->GetPoint(mainPts->GetId(0), mainHead);
+      mainArmature->GetPoint(mainPts->GetId(1), mainTail);
+      double otherHead[3];
+      double otherTail[3];
+      otherArmature->GetPoint(otherPts->GetId(0), otherHead);
+      otherArmature->GetPoint(otherPts->GetId(1), otherTail);
+      double translation[3];
+      vtkMath::Subtract(otherHead, mainHead, translation);
+      vtkMath::Subtract(mainTail, mainHead, mainTail);
+      vtkMath::Subtract(otherTail, otherHead, otherTail);
+      double rotation[3][3] = {{1.,0.,0.},{0.,1.,0.},{0.,0.,1.}};
+      this->ComputeTransform(mainTail, otherTail, rotation);
+      double transform[4][3];
+      memcpy(transform, rotation, 3*3*sizeof(double));
+      memcpy(transform[3], translation, 3*sizeof(double));
+      transforms->InsertNextTuple(transform[0]);
+
+      //vtkMath::Add(mainHead, transform[3], mainHead);
+      //vtkNew<vtkMatrix3x3> matrix;
+      //matrix->DeepCopy(transform[0]);
+      //matrix->Transpose();
+      //matrix->MultiplyPoint(mainTail, mainTail);
+      //vtkMath::Add(mainTail, mainHead, mainTail);
+      //mainArmature->GetPoints()->SetPoint(mainPts->GetId(0), mainHead);
+      //mainArmature->GetPoints()->SetPoint(mainPts->GetId(1), mainTail);
+      }
+    }
   vtkMRMLModelNode* modelNode= this->ModelsLogic->AddModel(mainArmature);
   std::string modelName = vtksys::SystemTools::GetFilenameName(fileName);
   modelNode->SetName(modelName.c_str());
