@@ -388,17 +388,21 @@ void vtkSlicerArmaturesLogic::ComputeTransform(double start[3], double end[3], d
 
   double rotationAxis[3] = {0., 0., 0.};
   vtkMath::Cross(startNormalized, endNormalized, rotationAxis);
-  vtkMath::Normalize(rotationAxis);
-  if (rotationAxis[0] != 0. || rotationAxis[1] != 0. || rotationAxis[2] != 0.)
+  if (rotationAxis[0] == 0. && rotationAxis[1] == 0. && rotationAxis[2] == 0.)
     {
-    double angle = vtkSlicerArmaturesLogic::ComputeAngle(startNormalized, endNormalized);
-    vtkSlicerArmaturesLogic::ComputeAxisAngleMatrix(rotationAxis, angle, mat);
+    double dummy[3];
+    vtkMath::Perpendiculars(startNormalized, rotationAxis, dummy, 0.);
     }
-  else
+  if (rotationAxis[0] == 0. && rotationAxis[1] == 0. && rotationAxis[2] == 0.)
     {
     vtkMath::Identity3x3(mat);
     }
-
+  else
+    {
+    vtkMath::Normalize(rotationAxis);
+    double angle = vtkSlicerArmaturesLogic::ComputeAngle(startNormalized, endNormalized);
+    vtkSlicerArmaturesLogic::ComputeAxisAngleMatrix(rotationAxis, angle, mat);
+    }
   double scaleMatrix[3][3] = {1.,0.,0.,0.,1.,0.,0.,0.,1.};
   scaleMatrix[0][0] = scaleMatrix[1][1] = scaleMatrix[2][2] = endNorm / startNorm;
   vtkMath::Multiply3x3(mat, scaleMatrix, mat);
@@ -409,6 +413,7 @@ void vtkSlicerArmaturesLogic::ComputeTransform(double start[3], double end[3], d
 double vtkSlicerArmaturesLogic::ComputeAngle(double v1[3], double v2[3])
 {
   double dot = vtkMath::Dot(v1, v2);
+  dot = std::min(dot, 1.);
   double angle = acos(dot);
   return angle;
 }
