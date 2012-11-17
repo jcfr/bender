@@ -66,10 +66,13 @@ Plugins = ${Slicer_QtPlugins_DIR}
 endif()
 
 # Install additional project if needed
-if (Slicer_ADDITIONAL_PROJECTS)
+if(DEFINED Slicer_ADDITIONAL_PROJECTS)
+  message( ">>>>>>>> 1 <<<<<")
   foreach(additional_project ${Slicer_ADDITIONAL_PROJECTS})
+  message( ">>>>>>>> 2 <<<<<")
     find_package(${additional_project})
     if (${additional_project}_FOUND)
+      message( ">>>>>>>> MHGEHEHEHHEHEH <<<<<")
       include(${${additional_project}_USE_FILE})
       if(NOT APPLE)
         set(CPACK_INSTALL_CMAKE_PROJECTS
@@ -85,13 +88,13 @@ set(CPACK_INSTALL_CMAKE_PROJECTS "${CPACK_INSTALL_CMAKE_PROJECTS};${Slicer_BINAR
 # -------------------------------------------------------------------------
 # Package properties
 # -------------------------------------------------------------------------
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Medical Visualization and Processing Environment for Research")
-
 set(CPACK_MONOLITHIC_INSTALL ON)
 
 set(Slicer_CPACK_PACKAGE_NAME ${SlicerApp_APPLICATION_NAME})
 set(Slicer_CPACK_PACKAGE_VENDOR "NA-MIC")
 set(Slicer_CPACK_PACKAGE_DESCRIPTION_FILE "${Slicer_SOURCE_DIR}/README.txt")
+set(Slicer_CPACK_PACKAGE_DESCRIPTION_SUMMARY
+  "Medical Visualization and Processing Environment for Research")
 set(Slicer_CPACK_RESOURCE_FILE_LICENSE "${Slicer_SOURCE_DIR}/License.txt")
 set(Slicer_CPACK_PACKAGE_VERSION_MAJOR "${Slicer_VERSION_MAJOR}")
 set(Slicer_CPACK_PACKAGE_VERSION_MINOR "${Slicer_VERSION_MINOR}")
@@ -102,13 +105,16 @@ set(project ${${Slicer_MAIN_PROJECT}_APPLICATION_NAME})
 
 set(CPACK_PACKAGE_NAME ${${project}_CPACK_PACKAGE_NAME})
 set(CPACK_PACKAGE_VENDOR ${${project}_CPACK_PACKAGE_VENDOR})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY ${${project}_CPACK_PACKAGE_DESCRIPTION_SUMMARY})
 set(CPACK_PACKAGE_DESCRIPTION_FILE ${${project}_CPACK_PACKAGE_DESCRIPTION_FILE})
 set(CPACK_RESOURCE_FILE_LICENSE ${${project}_CPACK_PACKAGE_FILE_LICENSE})
 set(CPACK_PACKAGE_VERSION_MAJOR ${${project}_CPACK_PACKAGE_VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${${project}_CPACK_PACKAGE_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${${project}_CPACK_PACKAGE_PATCH})
+set(CPACK_PACKAGE_VERSION_PATCH ${${project}_CPACK_PACKAGE_VERSION_PATCH})
 set(CPACK_PACKAGE_VERSION ${${project}_CPACK_PACKAGE_VERSION})
 set(CPACK_SYSTEM_NAME "${Slicer_OS}-${Slicer_ARCHITECTURE}")
+
+message ("NAME: ${CPACK_PACKAGE_NAME}, VENDOR: ${CPACK_PACKAGE_VENDOR} DESCRIPTION: ${CPACK_PACKAGE_DESCRIPTION_FILE} ${CPACK_PACKAGE_VERSION_MAJOR} ${CPACK_PACKAGE_VERSION_MINOR} ${CPACK_PACKAGE_VERSION_PATCH} ${CPACK_PACKAGE_VERSION}")
 
 if(APPLE)
   set(CPACK_PACKAGE_ICON "${Slicer_SOURCE_DIR}/Resources/Slicer.icns")

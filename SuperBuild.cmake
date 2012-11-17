@@ -312,6 +312,10 @@ endif()
 
 # Projects that Slicer needs to include
 if(Slicer_ADDITIONAL_PROJECTS)
+  # needed by packaging
+  list(APPEND ep_superbuild_extra_args
+    -DSlicer_ADDITIONAL_PROJECTS:STRING=${Slicer_ADDITIONAL_PROJECTS})
+  # needed to do find_package within Slicer
   foreach(additional_project ${Slicer_ADDITIONAL_PROJECTS})
     list(APPEND ep_superbuild_extra_args
       -D${additional_project}_DIR:PATH=${${additional_project}_DIR})
